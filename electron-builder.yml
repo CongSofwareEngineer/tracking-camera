@@ -6,8 +6,8 @@ directories:
   output: dist
   buildResources: resources
 
-# Ký số bằng hook tự viết (PowerShell) — ký app exe trước khi NSIS gói, và ký bộ cài sau cùng.
-afterPack: build/after-pack.js
+# Ký số local: exe chính + helper được dựng lại & ký trong scripts/pack-win.js (quy trình 2 pha),
+# còn bộ cài NSIS được ký ở hook afterAllArtifactBuild sau cùng.
 afterAllArtifactBuild: build/after-artifact.js
 
 files:

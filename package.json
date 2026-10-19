@@ -17,6 +17,7 @@
     "build:helper:win": "powershell -ExecutionPolicy Bypass -File scripts/build-helper-win.ps1",
     "build:helper:mac": "bash scripts/build-helper-mac.sh",
     "gen:cert": "powershell -ExecutionPolicy Bypass -File scripts/gen-cert.ps1",
+    "ensure:wincodesign": "powershell -ExecutionPolicy Bypass -File scripts/ensure-wincodesign.ps1",
     "build:win": "node scripts/bump-version.js && npm run gen:assets && npm run build:helper:win && electron-vite build && node scripts/pack-win.js",
     "build:win:nobump": "npm run gen:assets && npm run build:helper:win && electron-vite build && node scripts/pack-win.js",
     "build:mac": "node scripts/bump-version.js && npm run gen:assets && npm run build:helper:mac && electron-vite build && electron-builder --mac --publish never",
