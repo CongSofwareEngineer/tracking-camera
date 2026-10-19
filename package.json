@@ -1,6 +1,6 @@
 {
   "name": "camguard",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CamGuard — cảnh báo khi camera của máy bị ứng dụng sử dụng",
   "author": "CamGuard",
   "license": "MIT",

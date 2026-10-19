@@ -8,17 +8,15 @@ const path = require('path')
 
 const root = path.join(__dirname, '..')
 const pfx = path.join(root, 'build', 'cert', 'camguard-codesign.pfx')
-const pwdFile = path.join(root, 'build', 'cert', 'password.txt')
 
-if (fs.existsSync(pfx) && fs.existsSync(pwdFile)) {
-  process.env.CSC_LINK = 'file://' + pfx.replace(/\\/g, '/')
-  process.env.CSC_KEY_PASSWORD = fs.readFileSync(pwdFile, 'utf-8').trim()
-  console.log('[pack-win] Ký số bằng chứng chỉ build/cert/camguard-codesign.pfx')
-} else if (process.env.CSC_LINK) {
-  console.log('[pack-win] Ký số bằng CSC_LINK từ môi trường')
+if (fs.existsSync(pfx)) {
+  console.log('[pack-win] Sẽ ký bằng build/cert/camguard-codesign.pfx (qua build/after-pack.js)')
 } else {
   console.log('[pack-win] Không có chứng chỉ → đóng gói KHÔNG ký (xem scripts/gen-cert.ps1)')
 }
+// Không để CSC_* kích hoạt bước ký mặc định (dễ lỗi) — ký qua hook win.sign (build/sign.js).
+delete process.env.CSC_LINK
+delete process.env.CSC_KEY_PASSWORD
 
 const builder = require('electron-builder')
 const { Platform } = builder

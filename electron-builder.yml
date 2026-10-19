@@ -6,6 +6,10 @@ directories:
   output: dist
   buildResources: resources
 
+# Ký số bằng hook tự viết (PowerShell) — ký app exe trước khi NSIS gói, và ký bộ cài sau cùng.
+afterPack: build/after-pack.js
+afterAllArtifactBuild: build/after-artifact.js
+
 files:
   - out/**/*
   - package.json
@@ -29,10 +33,9 @@ win:
   extraResources:
     - from: helpers/win/bin/camguard-helper-win.exe
       to: helper/camguard-helper-win.exe
-  # Ký số: tự động dùng biến môi trường CSC_LINK + CSC_KEY_PASSWORD nếu có.
-  # (xem scripts/gen-cert.ps1 để tạo chứng chỉ tự ký dùng nội bộ)
 
 nsis:
+  artifactName: CamGuard-Setup-${version}.${ext}
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
