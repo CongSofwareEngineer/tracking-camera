@@ -1,0 +1,67 @@
+appId: com.camguard.app
+productName: CamGuard
+copyright: CamGuard
+
+directories:
+  output: dist
+  buildResources: resources
+
+files:
+  - out/**/*
+  - package.json
+
+# Tài nguyên dùng lúc chạy (tray icon + file âm thanh) — cho cả hai nền tảng.
+extraResources:
+  - from: resources/sounds
+    to: sounds
+    filter: ['**/*']
+  - from: resources/icons
+    to: icons
+    filter: ['**/*']
+
+win:
+  icon: resources/icons/app.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+  # Helper Windows → resources/helper/
+  extraResources:
+    - from: helpers/win/bin/camguard-helper-win.exe
+      to: helper/camguard-helper-win.exe
+  # Ký số: tự động dùng biến môi trường CSC_LINK + CSC_KEY_PASSWORD nếu có.
+  # (xem scripts/gen-cert.ps1 để tạo chứng chỉ tự ký dùng nội bộ)
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: CamGuard
+  include: build/installer.nsh
+
+mac:
+  icon: resources/icons/icon.png
+  category: public.app-category.utilities
+  target:
+    - target: dmg
+      arch:
+        - universal
+    - target: zip
+      arch:
+        - universal
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    LSUIElement: true
+  extraResources:
+    - from: helpers/mac/bin/camguard-helper-mac
+      to: helper/camguard-helper-mac
+
+dmg:
+  title: CamGuard ${version}
+
+# notarize: bật khi có APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID

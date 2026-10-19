@@ -1,0 +1,72 @@
+name: Build CamGuard
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+          - os: macos-latest
+            platform: mac
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup .NET (Windows helper)
+        if: matrix.platform == 'win'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Typecheck + test
+        run: |
+          npm run gen:assets
+          npm run typecheck
+          npm test
+
+      - name: Build Windows installer
+        if: matrix.platform == 'win'
+        run: npm run ci:build:win
+        env:
+          # Ký số thật: đặt secrets CSC_LINK (base64 pfx) + CSC_KEY_PASSWORD trong repo settings.
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+
+      - name: Build macOS installer
+        if: matrix.platform == 'mac'
+        run: npm run ci:build:mac
+        env:
+          # Ký + notarize (tuỳ chọn): đặt các secret tương ứng.
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: camguard-${{ matrix.platform }}
+          path: |
+            dist/*.exe
+            dist/*.dmg
+            dist/*.zip
+          if-no-files-found: ignore
