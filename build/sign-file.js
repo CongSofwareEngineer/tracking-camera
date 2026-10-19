@@ -28,12 +28,25 @@ $ErrorActionPreference = 'Stop'
 $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2(
   '${esc(PFX)}', '${esc(password)}',
   [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
-try {
-  $r = Set-AuthenticodeSignature -FilePath '${esc(file)}' -Certificate $cert -HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
-} catch {
-  $r = Set-AuthenticodeSignature -FilePath '${esc(file)}' -Certificate $cert -HashAlgorithm SHA256
+$file = '${esc(file)}'
+$r = $null
+# File .exe vừa được đóng gói có thể còn bị khoá (Defender/handle) → thử lại nhiều lần.
+for ($i = 1; $i -le 6; $i++) {
+  try {
+    try {
+      $r = Set-AuthenticodeSignature -FilePath $file -Certificate $cert -HashAlgorithm SHA256 -TimestampServer 'http://timestamp.digicert.com'
+    } catch [System.IO.IOException] {
+      throw
+    } catch {
+      $r = Set-AuthenticodeSignature -FilePath $file -Certificate $cert -HashAlgorithm SHA256
+    }
+    break
+  } catch {
+    if ($i -eq 6) { throw }
+    Start-Sleep -Milliseconds 1500
+  }
 }
-Write-Output ('[sign] ' + (Split-Path -Leaf '${esc(file)}') + ' -> ' + $r.Status)
+Write-Output ('[sign] ' + (Split-Path -Leaf $file) + ' -> ' + $r.Status)
 # 'Valid' = chuỗi tin cậy OK (cert đã được tin trên máy này).
 # 'UnknownError' = ĐÃ KÝ nhưng chuỗi tin cậy chưa dựng được (bình thường với cert tự ký
 #   chưa import trên máy build) — vẫn coi là thành công vì chữ ký đã có.
