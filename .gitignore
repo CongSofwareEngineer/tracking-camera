@@ -1,0 +1,22 @@
+node_modules/
+out/
+dist/
+*.log
+logs/
+
+# Helper build artifacts (CI/local rebuild từ source)
+helpers/win/bin/
+helpers/win/obj/
+helpers/win/.publish/
+helpers/mac/bin/
+helpers/mac/.build/
+
+# Tài nguyên sinh tự động (npm run gen:assets)
+resources/icons/
+resources/sounds/
+
+# Chứng chỉ ký số local — KHÔNG commit khoá riêng
+build/cert/
+
+.DS_Store
+Thumbs.db

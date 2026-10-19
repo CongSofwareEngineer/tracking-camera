@@ -1,0 +1,50 @@
+{
+  "name": "camguard",
+  "version": "1.0.2",
+  "description": "CamGuard — cảnh báo khi camera của máy bị ứng dụng sử dụng",
+  "author": "CamGuard",
+  "license": "MIT",
+  "main": "out/main/index.js",
+  "scripts": {
+    "bump": "node scripts/bump-version.js",
+    "gen:assets": "node scripts/gen-assets.js",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "vitest run",
+    "dev": "electron-vite dev",
+    "preview": "electron-vite preview",
+    "build": "electron-vite build",
+    "build:helper:win": "powershell -ExecutionPolicy Bypass -File scripts/build-helper-win.ps1",
+    "build:helper:mac": "bash scripts/build-helper-mac.sh",
+    "gen:cert": "powershell -ExecutionPolicy Bypass -File scripts/gen-cert.ps1",
+    "build:win": "node scripts/bump-version.js && npm run gen:assets && npm run build:helper:win && electron-vite build && node scripts/pack-win.js",
+    "build:win:nobump": "npm run gen:assets && npm run build:helper:win && electron-vite build && node scripts/pack-win.js",
+    "build:mac": "node scripts/bump-version.js && npm run gen:assets && npm run build:helper:mac && electron-vite build && electron-builder --mac --publish never",
+    "ci:build:win": "npm run gen:assets && npm run build:helper:win && electron-vite build && electron-builder --win --publish never",
+    "ci:build:mac": "npm run gen:assets && npm run build:helper:mac && electron-vite build && electron-builder --mac --publish never"
+  },
+  "dependencies": {
+    "electron-log": "^5.2.0",
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "electron": "^31.3.0",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "eslint": "^8.57.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.4",
+    "vitest": "^2.0.4"
+  },
+  "build": {
+    "extends": "./electron-builder.yml"
+  }
+}
