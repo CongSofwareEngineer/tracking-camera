@@ -10,6 +10,8 @@ export interface Settings {
   autoCloseSeconds: number // 0 = không tự đóng
   whitelist: string[]
   firstRunDone: boolean
+  /** Đã reset launchAtLogin bị bản cũ ghi sai thành false (chạy 1 lần). */
+  loginItemMigrated: boolean
 }
 
 export interface AppInfo {

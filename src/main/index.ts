@@ -111,8 +111,6 @@ function onHelperEvent(e: HelperEvent): void {
 function handleFirstRun(): void {
   if (settings.get('firstRunDone')) return
   settings.set('firstRunDone', true)
-  // bật khởi động cùng máy mặc định
-  applyLoginItem(settings.get('launchAtLogin'))
   if (Notification.isSupported()) {
     new Notification({
       title: 'CamGuard đang chạy',
@@ -121,26 +119,44 @@ function handleFirstRun(): void {
   }
 }
 
+// Windows: get/setLoginItemSettings phải dùng cùng path + args thì openAtLogin mới đọc đúng.
+const LOGIN_ITEM_ARGS = ['--hidden']
+
 function applyLoginItem(enabled: boolean): void {
+  // Bản dev (electron.exe trong node_modules) không được đăng ký, tránh ghi đè mục của bản cài.
+  if (!app.isPackaged) return
   try {
     app.setLoginItemSettings({
       openAtLogin: enabled,
       openAsHidden: true,
-      args: ['--hidden']
+      path: process.execPath,
+      args: LOGIN_ITEM_ARGS
     })
+    log.info('[main] login item =', enabled)
   } catch (err) {
     log.warn('[main] setLoginItemSettings lỗi', err)
   }
 }
 
-function syncLoginItemToSettings(): void {
+/**
+ * Settings là nguồn sự thật. Mỗi lần mở app: nếu đang bật mà OS chưa đăng ký đúng exe hiện tại
+ * (lần đầu cài, đổi thư mục cài, mục cũ trỏ sai) thì đăng ký lại. Nếu người dùng tắt trong
+ * Task Manager thì mục vẫn tồn tại (openAtLogin = true) nên không bị bật lại ngoài ý muốn.
+ */
+function ensureLoginItem(): void {
+  if (!settings.get('loginItemMigrated')) {
+    // Bản cũ đọc getLoginItemSettings() thiếu args → luôn false → ghi đè launchAtLogin = false.
+    settings.set('loginItemMigrated', true)
+    settings.set('launchAtLogin', true)
+    applyLoginItem(true)
+    return
+  }
+  if (!settings.get('launchAtLogin') || !app.isPackaged) return
   try {
-    const li = app.getLoginItemSettings()
-    if (li.openAtLogin !== settings.get('launchAtLogin')) {
-      settings.set('launchAtLogin', li.openAtLogin)
-    }
-  } catch {
-    /* ignore */
+    const li = app.getLoginItemSettings({ path: process.execPath, args: LOGIN_ITEM_ARGS })
+    if (!li.openAtLogin) applyLoginItem(true)
+  } catch (err) {
+    log.warn('[main] getLoginItemSettings lỗi', err)
   }
 }
 
@@ -280,7 +296,7 @@ function boot(): void {
   void history.load()
 
   handleFirstRun()
-  syncLoginItemToSettings()
+  ensureLoginItem()
 
   helper.start()
 

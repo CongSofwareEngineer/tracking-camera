@@ -10,7 +10,8 @@ const DEFAULTS: Settings = {
   forceSystemVolume: false,
   autoCloseSeconds: 3,
   whitelist: [],
-  firstRunDone: false
+  firstRunDone: false,
+  loginItemMigrated: false
 }
 
 export class SettingsStore {
