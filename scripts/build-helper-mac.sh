@@ -16,10 +16,10 @@ echo "[helper:mac] swift build universal (arm64 + x86_64)"
 cd "$PKG"
 swift build -c release --arch arm64 --arch x86_64
 
-BUILT="$PKG/.build/apple/Products/Release/camguard-helper-mac"
+BUILT="$PKG/.build/apple/Products/Release/CamGuardHelper"
 if [ ! -f "$BUILT" ]; then
   # fallback đường dẫn một kiến trúc
-  BUILT="$(find "$PKG/.build" -name camguard-helper-mac -type f | head -n1)"
+  BUILT="$(find "$PKG/.build" -name CamGuardHelper -type f -perm +111 -not -path "*.dSYM*" | head -n1)"
 fi
 if [ -z "${BUILT:-}" ] || [ ! -f "$BUILT" ]; then
   echo "Không thấy binary output" >&2

@@ -60,6 +60,8 @@ mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     LSUIElement: true
+  # Helper đã là universal binary (lipo) → báo cho @electron/universal giữ nguyên, không merge.
+  x64ArchFiles: Contents/Resources/helper/camguard-helper-mac
   extraResources:
     - from: helpers/mac/bin/camguard-helper-mac
       to: helper/camguard-helper-mac
