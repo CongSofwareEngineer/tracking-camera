@@ -19,6 +19,9 @@ export class AlertController {
   prewarm(): void {
     if (this.win) return
     this.win = new BrowserWindow({
+      // macOS: NSPanel non-activating → nổi trên app full-screen và theo người dùng sang mọi Space
+      // (NSWindow thường bị "kẹt" ở Space full-screen nơi nó được hiện lần đầu)
+      ...(process.platform === 'darwin' ? { type: 'panel' } : {}),
       width: WIDTH,
       height: HEIGHT,
       show: false,
@@ -45,7 +48,11 @@ export class AlertController {
     })
 
     this.win.setAlwaysOnTop(true, 'screen-saver')
-    this.win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+    // skipTransformProcessType: app đã là LSUIElement, không cần Electron đổi process type (gây nháy Dock/mất focus)
+    this.win.setVisibleOnAllWorkspaces(true, {
+      visibleOnFullScreen: true,
+      skipTransformProcessType: true
+    })
 
     this.win.on('closed', () => {
       this.win = null
@@ -133,7 +140,10 @@ export class AlertController {
 
     this.moveToCursorDisplay()
     this.win?.setAlwaysOnTop(true, 'screen-saver')
-    this.win?.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+    this.win?.setVisibleOnAllWorkspaces(true, {
+      visibleOnFullScreen: true,
+      skipTransformProcessType: true
+    })
 
     if (this.ready) {
       this.win?.webContents.send('alert:update', payload)
